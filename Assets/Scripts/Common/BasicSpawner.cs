@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using Fusion;
 using Fusion.Sockets;
 using System;
@@ -8,10 +9,10 @@ using UnityEngine.UI;
 
 public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
-    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
     public void OnInput(NetworkRunner runner, NetworkInput input) { }
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
+    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
     public void OnConnectedToServer(NetworkRunner runner) { }
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
@@ -49,17 +50,16 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     [Header("NetWorkStart")]
     [SerializeField] InputField _userNameInput;
     [SerializeField] InputField _passwordInput;
-    [SerializeField] GameObject _netWorkStartCanvas;
-    [SerializeField] GameObject _chatRoomCanvas;
-    [SerializeField] GameObject _selectCanvas;
     public string UserName { get; private set; }
-
 
     async public void StartGame()
     {
+        if (_userNameInput.text == string.Empty || _passwordInput.text == string.Empty) { return; }
         // Create the Fusion runner and let it know that we will be providing user input
         _runner = gameObject.AddComponent<NetworkRunner>();
         _runner.ProvideInput = true;
+        NetworkRunnerLocator.Instance = _runner;
+
 
         // Create the NetworkSceneInfo from the current scene
         var scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
@@ -69,22 +69,37 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
             sceneInfo.AddSceneRef(scene, LoadSceneMode.Additive);
         }
 
+
         // Start or join (depends on gamemode) a session with a specific name
         await _runner.StartGame(new StartGameArgs()
         {
-            GameMode = GameMode.AutoHostOrClient,
+            GameMode = GameMode.Shared,
             SessionName = _passwordInput.text,
             Scene = scene,
             SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
         });
 
-        _netWorkStartCanvas.SetActive(false);
-        _chatRoomCanvas.SetActive(true);
-        _selectCanvas.SetActive(true);
+        UserName = _userNameInput.text;
+
+        // Chatに入室メッセージを送る
+        (await ChatData.GetInstanceAsync()).RPC_AddComment($"System:{UserName}が入室しました");
+
+        // UserDataに自身を登録
+        (await UserData.GetInstanceAsync()).RPC_AddPlayer(_runner.LocalPlayer, UserName);
+
+        if((await NetWorkGameState.GetInstanceAsync()).CurrentGameState == GameState.Title)
+        {
+            NetWorkGameState.Instance.CurrentGameState = GameState.GameSelect;
+        }
+        else
+        {
+            UIChanger.Instance.CurrentState = NetWorkGameState.Instance.CurrentGameState;
+        }
     }
+
+
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
         JoinGame?.Invoke();
-        Debug.Log("Join");
     }
 }
