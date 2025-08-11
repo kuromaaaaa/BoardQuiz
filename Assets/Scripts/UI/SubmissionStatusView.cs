@@ -1,25 +1,33 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Linq;
 
 public class SubmissionStatusView : MonoBehaviour
 {
     [SerializeField] Text text;
     private void OnEnable()
     {
-        QuizData.Instance.ChangeSubmitUI += ViewUpdate;
+        QuizData.Instance.ChangeSubmitDic += ViewUpdate;
         ViewUpdate();
     }
 
     private void OnDisable()
     {
-        QuizData.Instance.ChangeSubmitUI -= ViewUpdate;
+        QuizData.Instance.ChangeSubmitDic -= ViewUpdate;
     }
 
     async void ViewUpdate()
     {
         QuizData data = (await QuizData.GetInstanceAsync());
-        text.text = $"{data.SubmittedDic.Where((x) => x.Value == true).Count()}/{data.SubmittedDic.Count}";
+        int submitCount = data.NwpSubmittedDic.Where((x) => x.Value == true).Count();
+        if (submitCount == 0)
+        {
+            text.text = string.Empty;
+        }
+        else
+        {
+            text.text = $"{submitCount}/{data.NwpSubmittedDic.Count}";
+        }
     }
 
 }

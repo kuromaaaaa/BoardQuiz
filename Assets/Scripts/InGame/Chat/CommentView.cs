@@ -25,7 +25,7 @@ public class CommentView : MonoBehaviour
 
     void AllCommentInstantiate()
     {
-        foreach (var comment in ChatData.Instance.CommentList)
+        foreach (var comment in ChatData.Instance.NwpCommentList)
         {
             CommentInstantiate((string)comment);
         }
@@ -36,7 +36,7 @@ public class CommentView : MonoBehaviour
         GameObject text = Instantiate(_textBlock);
         string[] s = comment.Split(':');
         Color color = _etcColor;
-        if (s[0] == BasicSpawner.Instance.UserName)
+        if (s[0] == NetworkRunnerLocator.Name)
         {
             color = _userColor;
         }
@@ -44,7 +44,7 @@ public class CommentView : MonoBehaviour
         {
             color = _systemColor;
         }
-        text.GetComponent<Comment>().Initialize(s[0], s[1],color);
+        text.GetComponent<Comment>().Initialize(s[0], s[1], color);
         text.transform.SetParent(transform, false);
     }
 

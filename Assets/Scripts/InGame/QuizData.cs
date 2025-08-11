@@ -1,58 +1,84 @@
 using Fusion;
 using System;
-using System.Security.Cryptography.X509Certificates;
-using Unity.VisualScripting;
+using System.Linq;
 using UnityEngine;
 
-public class QuizData : SingletonNetWorkBehaviour<QuizData>,IPlayerJoined,IPlayerLeft
+public class QuizData : SingletonNetWorkBehaviour<QuizData>, IPlayerJoined
 {
-    [Networked][UnitySerializeField] public NetworkString<_32> Question { get; set; }
-    [Networked][UnitySerializeField] public NetworkString<_32> Answer { get; set; }
-    [Networked][UnitySerializeField] public int ThinkingTime { get; set; }
-    [Networked][UnitySerializeField] public QuizGameMode GameMode { get; set; } = QuizGameMode.Select;
-    [Networked][Capacity(100)][UnitySerializeField] public NetworkDictionary<PlayerRef,NetworkString<_32>> AnswerDic { get;} = new();
-    [Networked, OnChangedRender(nameof(OnChangeSubmittedDic))][Capacity(100)][UnitySerializeField] public NetworkDictionary<PlayerRef, bool> SubmittedDic { get;} = new();
+    [Networked][UnitySerializeField] public NetworkString<_32> NwpQuestion { get; set; }
+    [Networked][UnitySerializeField] public NetworkString<_32> NwpAnswer { get; set; }
+    [Networked][UnitySerializeField] public int NwpThinkingTime { get; set; }
+    [Networked][UnitySerializeField] public QuizGameMode NwpGameMode { get; set; } = QuizGameMode.Select;
+    [Networked, OnChangedRender(nameof(OnChangeAnswerDic))][Capacity(100)][UnitySerializeField] public NetworkDictionary<int, NetworkString<_32>> NwpAnswerDic { get; } = new();
+    [Networked, OnChangedRender(nameof(OnChangeSubmittedDic))][Capacity(100)][UnitySerializeField] public NetworkDictionary<int, bool> NwpSubmittedDic { get; } = new();
 
-    public Action ChangeSubmitUI;
+    public Action ChangeSubmitDic;
     public Action ChangeAnswerDic;
 
     public void PlayerJoined(PlayerRef player)
     {
-        RPC_PlayerAdd(player);
-    }
-
-    public void PlayerLeft(PlayerRef player)
-    {
-        RPC_PlayerRemove(player);
-    }
-    [Rpc(RpcSources.All, RpcTargets.All)]
-    public void RPC_PlayerAdd(PlayerRef player)
-    {
-        AnswerDic.Set(player, string.Empty);
-        SubmittedDic.Set(player, false);
-    }
-    [Rpc(RpcSources.All, RpcTargets.All)]
-    public void RPC_PlayerRemove(PlayerRef player)
-    {
-        RPC_PlayerAdd(player);
-        AnswerDic.Remove(player);
-        SubmittedDic.Remove(player);
+        RPC_PlayerAdd(player.PlayerId);
     }
 
     [Rpc(RpcSources.All, RpcTargets.All)]
-    public void RPC_Question(string q,string a,int time)
+    public void RPC_PlayerAdd(int id)
     {
-        Question = q;
-        Answer = a;
-        ThinkingTime = time;
+        Debug.Log($"追加！ PlayerID : {id}");
+        NwpAnswerDic.Set(id, string.Empty);
+        NwpSubmittedDic.Set(id, false);
+    }
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_PlayerRemove(int id)
+    {
+        Debug.Log($"削除！ PlayerID : {id}");
+        NwpAnswerDic.Remove(id);
+        NwpSubmittedDic.Remove(id);
+    }
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_PlayerClear()
+    {
+        NwpAnswerDic.Clear();
+        NwpSubmittedDic.Clear();
+    }
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_Question(string q, string a, int time)
+    {
+        NwpQuestion = q;
+        NwpAnswer = a;
+        NwpThinkingTime = time;
     }
 
-    void OnChangeSubmittedDic()
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id">PlayerId</param>
+    /// <param name="submit">提出したか</param>
+    /// <param name="answer">答え</param>
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_SendAnswer(int id, bool submit, string answer)
     {
-        ChangeSubmitUI?.Invoke();
+        NwpAnswerDic.Set(id, answer);
+        NwpSubmittedDic.Set(id, submit);
     }
 
-    void OnChangeAnswerDic() => ChangeAnswerDic?.Invoke();
+    private async void OnChangeSubmittedDic()
+    {
+        if (NwpSubmittedDic.Count == NwpSubmittedDic.Where((x) => x.Value == true).Count())
+        { // 全員が提出しているか確認
+
+            NetWorkGameState gameState = (await NetWorkGameState.GetInstanceAsync());
+            if (gameState.NwpCurrentGameState == GameState.Thinking)
+            {
+                gameState.RPC_ChangeState(GameState.Answer);
+            }
+        }
+        ChangeSubmitDic?.Invoke();
+    }
+
+    private void OnChangeAnswerDic()
+    {
+        ChangeAnswerDic?.Invoke();
+    }
 
 }
 

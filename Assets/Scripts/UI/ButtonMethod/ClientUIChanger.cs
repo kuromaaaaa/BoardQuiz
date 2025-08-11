@@ -6,6 +6,6 @@ public class ClientUIChanger : MonoBehaviour
 
     public void ChangeState()
     {
-        UIChanger.Instance.CurrentState = nextState;
+        UIManager.Instance.CurrentState = nextState;
     }
 }

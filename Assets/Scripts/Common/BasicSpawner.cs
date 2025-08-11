@@ -50,9 +50,8 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     [Header("NetWorkStart")]
     [SerializeField] InputField _userNameInput;
     [SerializeField] InputField _passwordInput;
-    public string UserName { get; private set; }
 
-    async public void StartGame()
+    public async void StartGame()
     {
         if (_userNameInput.text == string.Empty || _passwordInput.text == string.Empty) { return; }
         // Create the Fusion runner and let it know that we will be providing user input
@@ -79,21 +78,21 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
             SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
         });
 
-        UserName = _userNameInput.text;
+        NetworkRunnerLocator.Name = _userNameInput.text;
 
         // Chatに入室メッセージを送る
-        (await ChatData.GetInstanceAsync()).RPC_AddComment($"System:{UserName}が入室しました");
+        (await ChatData.GetInstanceAsync()).RPC_AddComment($"System:{NetworkRunnerLocator.Name}が入室しました");
 
         // UserDataに自身を登録
-        (await UserData.GetInstanceAsync()).RPC_AddPlayer(_runner.LocalPlayer, UserName);
+        (await UserData.GetInstanceAsync()).RPC_AddPlayer(_runner.LocalPlayer, NetworkRunnerLocator.Name);
 
-        if((await NetWorkGameState.GetInstanceAsync()).CurrentGameState == GameState.Title)
+        if ((await NetWorkGameState.GetInstanceAsync()).NwpCurrentGameState == GameState.Title)
         {
-            NetWorkGameState.Instance.CurrentGameState = GameState.GameSelect;
+            NetWorkGameState.Instance.NwpCurrentGameState = GameState.GameSelect;
         }
         else
         {
-            UIChanger.Instance.CurrentState = NetWorkGameState.Instance.CurrentGameState;
+            UIManager.Instance.CurrentState = NetWorkGameState.Instance.NwpCurrentGameState;
         }
     }
 

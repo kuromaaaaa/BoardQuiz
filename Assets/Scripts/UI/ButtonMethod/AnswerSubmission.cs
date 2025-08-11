@@ -1,4 +1,3 @@
-using Fusion;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,15 +5,18 @@ public class AnswerSubmission : MonoBehaviour
 {
     bool _isSubmission;
     [SerializeField] InputField _answerInput;
-    public async void Send()
+    [SerializeField] Image _checkMark;
+    [SerializeField] Sprite _checkTrue;
+    [SerializeField] Sprite _checkFalse;
+    public async void Send(bool submit)
     {
-        _isSubmission = !_isSubmission;
-        (await QuizData.GetInstanceAsync()).SubmittedDic.Set(NetworkRunnerLocator.Instance.LocalPlayer,_isSubmission);
-        (await QuizData.GetInstanceAsync()).AnswerDic.Set(NetworkRunnerLocator.Instance.LocalPlayer, _answerInput.text);
-    }
+        _isSubmission = submit;
 
-    public async void ProgressSend()
-    {
-        (await QuizData.GetInstanceAsync()).AnswerDic.Set(NetworkRunnerLocator.Instance.LocalPlayer, _answerInput.text);
+        Debug.Log("send");
+
+        (await QuizData.GetInstanceAsync()).RPC_SendAnswer(
+            NetworkRunnerLocator.Instance.LocalPlayer.PlayerId, _isSubmission, _answerInput.text);
+        Debug.Log($"ìöÇ¶íÒèo : PlayerID {NetworkRunnerLocator.Instance.LocalPlayer.PlayerId} : ìöÇ¶ {_answerInput.text}");
+        _checkMark.sprite = _isSubmission ? _checkTrue : _checkFalse;
     }
 }

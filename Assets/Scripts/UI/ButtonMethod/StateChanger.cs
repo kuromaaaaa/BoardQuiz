@@ -1,11 +1,10 @@
-using Fusion;
 using UnityEngine;
 
 public class StateChanger : MonoBehaviour
 {
     [SerializeField] GameState _gameMode;
-    public void StateChange()
+    public async void StateChange()
     {
-        NetWorkGameState.Instance.CurrentGameState = _gameMode;
+        (await NetWorkGameState.GetInstanceAsync()).RPC_ChangeState(_gameMode);
     }
 }

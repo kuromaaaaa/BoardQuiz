@@ -1,11 +1,10 @@
 using Fusion;
 using System;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class ChatData : SingletonNetWorkBehaviour<ChatData>
 {
-    [Networked][Capacity(100)][UnitySerializeField] public NetworkLinkedList<NetworkString<_32>> CommentList { get ; } = new NetworkLinkedList<NetworkString<_32>>();
+    [Networked][Capacity(100)][UnitySerializeField] public NetworkLinkedList<NetworkString<_32>> NwpCommentList { get; } = new NetworkLinkedList<NetworkString<_32>>();
 
     public Action SpawnedAction;
     public Action<string> AddCommentAction;
@@ -21,7 +20,7 @@ public class ChatData : SingletonNetWorkBehaviour<ChatData>
     public void RPC_AddComment(string message)
     {
         Debug.Log(message);
-        CommentList.Add(message);
+        NwpCommentList.Add(message);
         AddCommentAction?.Invoke(message);
     }
 }

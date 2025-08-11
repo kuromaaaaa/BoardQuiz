@@ -12,7 +12,7 @@ public class SingletonMonoBehavior<T> : MonoBehaviour where T : MonoBehaviour
         else if (Instance != this)
             Destroy(gameObject);
 
-        if(DDOL)
+        if (DDOL)
         {
             DontDestroyOnLoad(gameObject);
         }

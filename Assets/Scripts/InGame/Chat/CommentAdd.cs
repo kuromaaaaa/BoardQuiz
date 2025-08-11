@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -20,7 +19,7 @@ public class CommentAdd : MonoBehaviour
     {
         if (_commentText.text == string.Empty)
             return;
-        (await ChatData.GetInstanceAsync()).RPC_AddComment($"{BasicSpawner.Instance.UserName}:{_commentText.text}");
+        (await ChatData.GetInstanceAsync()).RPC_AddComment($"{NetworkRunnerLocator.Name}:{_commentText.text}");
         _commentText.text = string.Empty;
         EventSystem.current.SetSelectedGameObject(_commentText.gameObject);
     }

@@ -5,17 +5,21 @@ using UnityEngine;
 public class UserData : SingletonNetWorkBehaviour<UserData>, IPlayerLeft
 {
 
-    [Networked][Capacity(100)][UnitySerializeField] public NetworkDictionary<PlayerRef, NetworkString<_32>> UserList { get; } = new NetworkDictionary<PlayerRef, NetworkString<_32>>();
+    [Networked][Capacity(100)][UnitySerializeField] public NetworkDictionary<int, NetworkString<_32>> NwpUserDic { get; } = new();
+
+    // PlayerJoinÇÕBasicSpawnerÇ™çsÇ§
+
+
 
     public async void PlayerLeft(PlayerRef player)
     {
-        (await ChatData.GetInstanceAsync()).RPC_AddComment($"System:{UserList[player]}Ç™ëﬁé∫ÇµÇ‹ÇµÇΩ");
-        UserList.Remove(player);
+        (await ChatData.GetInstanceAsync()).RPC_AddComment($"System:{NwpUserDic[player.PlayerId]}Ç™ëﬁé∫ÇµÇ‹ÇµÇΩ");
+        NwpUserDic.Remove(player.PlayerId);
     }
 
     [Rpc(RpcSources.All, RpcTargets.All)]
-    public void RPC_AddPlayer(PlayerRef player ,string name )
+    public void RPC_AddPlayer(PlayerRef player, string name)
     {
-        UserList.Add(player, name);
+        NwpUserDic.Add(player.PlayerId, name);
     }
 }

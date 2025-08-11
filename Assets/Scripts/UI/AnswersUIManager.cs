@@ -4,26 +4,41 @@ using UnityEngine;
 public class AnswersUIManager : MonoBehaviour
 {
     [SerializeField] GameObject _answerPrefab;
-    Dictionary<PlayerPrefs, Answer> AnswerDic;
+    Dictionary<int, Answer> AnswerDic = new();
     private async void OnEnable()
     {
-        QuizData q = (await QuizData.GetInstanceAsync());
         QuizData.Instance.ChangeAnswerDic += AnswerChange;
-        foreach(var answer in q.AnswerDic)
+
+        QuizData q = (await QuizData.GetInstanceAsync());
+        foreach (var answer in q.NwpAnswerDic)
         {
+            GameObject answerBoard = Instantiate(_answerPrefab);
+            answerBoard.transform.SetParent(this.transform, false);
+            Answer ans = answerBoard.GetComponent<Answer>();
+            ans.Initialize(
+                (string)(await UserData.GetInstanceAsync()).NwpUserDic[answer.Key],
+                (string)answer.Value);
+            AnswerDic[answer.Key] = ans;
         }
     }
 
     private void OnDisable()
     {
-        foreach(Transform tf in this.gameObject.transform)
+        QuizData.Instance.ChangeAnswerDic -= AnswerChange;
+
+        foreach (Transform tf in this.gameObject.transform)
         {
             Destroy(tf.gameObject);
         }
+        AnswerDic = new();
     }
 
-    void AnswerChange()
+    async void AnswerChange()
     {
-
+        Debug.Log("ìöÇ¶ÇÃïœçX");
+        foreach (var ans in (await QuizData.GetInstanceAsync()).NwpAnswerDic)
+        {
+            AnswerDic[ans.Key].AnswerUpdate((string)ans.Value);
+        }
     }
 }

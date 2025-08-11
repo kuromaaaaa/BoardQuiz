@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,6 +8,6 @@ public class QuestionInput : MonoBehaviour
     [SerializeField] Slider _time;
     public async void QuestionSend()
     {
-        (await QuizData.GetInstanceAsync()).RPC_Question(Q.text,A.text,(int)_time.value);
+        (await QuizData.GetInstanceAsync()).RPC_Question(Q.text, A.text, (int)_time.value);
     }
 }

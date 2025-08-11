@@ -9,14 +9,14 @@ public class Repetition : MonoBehaviour
     [SerializeField] float _moveSpeed;
 
     bool _state = true;
-    bool state 
-    { 
-        get => _state; 
-        set 
+    bool state
+    {
+        get => _state;
+        set
         {
             _transform.DOAnchorPos((value ? Pos1 : Pos2), _moveSpeed);
             _state = value;
-        } 
+        }
     }
 
     public void Move()

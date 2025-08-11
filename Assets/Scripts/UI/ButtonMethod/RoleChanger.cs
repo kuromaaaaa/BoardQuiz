@@ -5,6 +5,6 @@ public class RoleChanger : MonoBehaviour
     [SerializeField] PlayerRole changeRole;
     public void RoleChange()
     {
-        UIChanger.Instance.Role = changeRole;
+        UIManager.Instance.Role = changeRole;
     }
 }
