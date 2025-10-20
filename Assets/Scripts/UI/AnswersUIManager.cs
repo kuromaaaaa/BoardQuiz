@@ -7,7 +7,7 @@ public class AnswersUIManager : MonoBehaviour
     Dictionary<int, Answer> AnswerDic = new();
     private async void OnEnable()
     {
-        QuizData.Instance.ChangeAnswerDic += AnswerChange;
+        QuizData.Instance.ChangeAnswerDicAction += AnswerChange;
 
         QuizData q = (await QuizData.GetInstanceAsync());
         foreach (var answer in q.NwpAnswerDic)
@@ -24,7 +24,7 @@ public class AnswersUIManager : MonoBehaviour
 
     private void OnDisable()
     {
-        QuizData.Instance.ChangeAnswerDic -= AnswerChange;
+        QuizData.Instance.ChangeAnswerDicAction -= AnswerChange;
 
         foreach (Transform tf in this.gameObject.transform)
         {

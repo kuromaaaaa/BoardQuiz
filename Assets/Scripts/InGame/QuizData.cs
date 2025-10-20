@@ -12,8 +12,8 @@ public class QuizData : SingletonNetWorkBehaviour<QuizData>, IPlayerJoined
     [Networked, OnChangedRender(nameof(OnChangeAnswerDic))][Capacity(100)][UnitySerializeField] public NetworkDictionary<int, NetworkString<_32>> NwpAnswerDic { get; } = new();
     [Networked, OnChangedRender(nameof(OnChangeSubmittedDic))][Capacity(100)][UnitySerializeField] public NetworkDictionary<int, bool> NwpSubmittedDic { get; } = new();
 
-    public Action ChangeSubmitDic;
-    public Action ChangeAnswerDic;
+    public Action ChangeSubmitDicAction;
+    public Action ChangeAnswerDicAction;
 
     public void PlayerJoined(PlayerRef player)
     {
@@ -23,14 +23,14 @@ public class QuizData : SingletonNetWorkBehaviour<QuizData>, IPlayerJoined
     [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_PlayerAdd(int id)
     {
-        Debug.Log($"追加！ PlayerID : {id}");
+        Debug.Log($"Add PlayerID : {id}");
         NwpAnswerDic.Set(id, string.Empty);
         NwpSubmittedDic.Set(id, false);
     }
     [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_PlayerRemove(int id)
     {
-        Debug.Log($"削除！ PlayerID : {id}");
+        Debug.Log($"Remove PlayerID : {id}");
         NwpAnswerDic.Remove(id);
         NwpSubmittedDic.Remove(id);
     }
@@ -52,8 +52,8 @@ public class QuizData : SingletonNetWorkBehaviour<QuizData>, IPlayerJoined
     /// 
     /// </summary>
     /// <param name="id">PlayerId</param>
-    /// <param name="submit">提出したか</param>
-    /// <param name="answer">答え</param>
+    /// <param name="submit">諤ｪ逶玲署蜃ｺ</param>
+    /// <param name="answer">遲斐∴</param>
     [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_SendAnswer(int id, bool submit, string answer)
     {
@@ -63,8 +63,8 @@ public class QuizData : SingletonNetWorkBehaviour<QuizData>, IPlayerJoined
 
     private async void OnChangeSubmittedDic()
     {
-        if (NwpSubmittedDic.Count == NwpSubmittedDic.Where((x) => x.Value == true).Count())
-        { // 全員が提出しているか確認
+        if (NwpSubmittedDic.Count == NwpSubmittedDic.Where((x) => x.Value).Count())
+        { // 縺吶∋縺ｦ縺ｮPlayer縺悟屓遲斐＠縺溘ｉ
 
             NetWorkGameState gameState = (await NetWorkGameState.GetInstanceAsync());
             if (gameState.NwpCurrentGameState == GameState.Thinking)
@@ -72,12 +72,12 @@ public class QuizData : SingletonNetWorkBehaviour<QuizData>, IPlayerJoined
                 gameState.RPC_ChangeState(GameState.Answer);
             }
         }
-        ChangeSubmitDic?.Invoke();
+        ChangeSubmitDicAction?.Invoke();
     }
 
     private void OnChangeAnswerDic()
     {
-        ChangeAnswerDic?.Invoke();
+        ChangeAnswerDicAction?.Invoke();
     }
 
 }

@@ -86,3 +86,6 @@ crashlytics-build.properties
 Assets/StoreAssets/
 WebGLBuild/
 WinBuild/
+Assets/IgnoreFolder/
+Assets/Photon/
+Assets/Plugins/

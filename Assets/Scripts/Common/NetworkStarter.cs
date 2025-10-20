@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
+public class NetworkStarter : MonoBehaviour, INetworkRunnerCallbacks
 {
     public void OnInput(NetworkRunner runner, NetworkInput input) { }
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
@@ -28,14 +28,14 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
     public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
 
-    public static BasicSpawner _instance;
-    public static BasicSpawner Instance
+    private static NetworkStarter _instance;
+    public static NetworkStarter Instance
     {
         get
         {
             if (!_instance)
             {
-                _instance = FindObjectOfType<BasicSpawner>();
+                _instance = FindObjectOfType<NetworkStarter>();
             }
 
             return _instance;
@@ -80,10 +80,10 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
         NetworkRunnerLocator.Name = _userNameInput.text;
 
-        // Chatに入室メッセージを送る
-        (await ChatData.GetInstanceAsync()).RPC_AddComment($"System:{NetworkRunnerLocator.Name}が入室しました");
+        // Chat縺ｫ閾ｪ霄ｫ縺悟盾蜉縺励◆繝｡繝�繧ｻ繝ｼ繧ｸ繧帝∽ｿ｡縺吶ｋ
+        (await ChatData.GetInstanceAsync()).RPC_AddComment($"System:{NetworkRunnerLocator.Name}縺悟盾蜉縺励∪縺励◆");
 
-        // UserDataに自身を登録
+        // UserData縺ｫID縺ｨ繝ｦ繝ｼ繧ｶ繝ｼ蜷阪ｒ霑ｽ蜉
         (await UserData.GetInstanceAsync()).RPC_AddPlayer(_runner.LocalPlayer, NetworkRunnerLocator.Name);
 
         if ((await NetWorkGameState.GetInstanceAsync()).NwpCurrentGameState == GameState.Title)
@@ -94,11 +94,11 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         {
             UIManager.Instance.CurrentState = NetWorkGameState.Instance.NwpCurrentGameState;
         }
+        JoinGame?.Invoke();
     }
 
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        JoinGame?.Invoke();
     }
 }

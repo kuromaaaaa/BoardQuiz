@@ -26,13 +26,13 @@ public class UIManager : SingletonMonoBehavior<UIManager>
     private void OnEnable()
     {
         NetWorkGameState.Instance.ClientChangeSceneAction += OnChangeState;
-        QuizData.Instance.ChangeSubmitDic += AllSubmitAnswer;
+        QuizData.Instance.ChangeSubmitDicAction += AllSubmitAnswer;
     }
 
     private void OnDisable()
     {
         NetWorkGameState.Instance.ClientChangeSceneAction -= OnChangeState;
-        QuizData.Instance.ChangeSubmitDic -= AllSubmitAnswer;
+        QuizData.Instance.ChangeSubmitDicAction -= AllSubmitAnswer;
     }
 
     private async void OnChangeState(GameState nextState)

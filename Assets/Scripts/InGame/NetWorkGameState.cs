@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using Fusion;
 using System;
+using System.Collections.Generic;
 
 public class NetWorkGameState : SingletonNetWorkBehaviour<NetWorkGameState>
 {
@@ -22,15 +23,8 @@ public class NetWorkGameState : SingletonNetWorkBehaviour<NetWorkGameState>
         }
         else if(NwpCurrentGameState == GameState.Answer)
         {
-            QuizData quizData = (await QuizData.GetInstanceAsync());
             ScoreData score = (await ScoreData.GetInstanceAsync());
-            foreach(var kv in quizData.NwpAnswerDic)
-            {
-                if(kv.Value == quizData.NwpAnswer)
-                {
-                    score.RPC_ScoreAdd(kv.Key);
-                }
-            }
+            score.Correct();
         }
     }
 

@@ -7,19 +7,19 @@ public class UserData : SingletonNetWorkBehaviour<UserData>, IPlayerLeft
 
     [Networked][Capacity(100)][UnitySerializeField] public NetworkDictionary<int, NetworkString<_32>> NwpUserDic { get; } = new();
 
-    // PlayerJoin‚ÍBasicSpawner‚ªs‚¤
+    // PlayerJoinã¯NetWorkStarterãŒå‘¼ã¶
 
 
 
     public async void PlayerLeft(PlayerRef player)
     {
-        (await ChatData.GetInstanceAsync()).RPC_AddComment($"System:{NwpUserDic[player.PlayerId]}‚ª‘Şº‚µ‚Ü‚µ‚½");
+        (await ChatData.GetInstanceAsync()).RPC_AddComment($"System:{NwpUserDic[player.PlayerId]} ãŒé€€å®¤ã—ã¾ã—ãŸ");
         NwpUserDic.Remove(player.PlayerId);
     }
 
     [Rpc(RpcSources.All, RpcTargets.All)]
-    public void RPC_AddPlayer(PlayerRef player, string name)
+    public void RPC_AddPlayer(PlayerRef player, string playerName)
     {
-        NwpUserDic.Add(player.PlayerId, name);
+        NwpUserDic.Add(player.PlayerId, playerName);
     }
 }

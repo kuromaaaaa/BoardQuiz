@@ -5,10 +5,10 @@ using UnityEngine;
 
 public abstract class SingletonNetWorkBehaviour<T> : NetworkBehaviour where T : NetworkBehaviour
 {
-    // NetWorkObject‚ªƒXƒ|[ƒ“‚³‚ê‚Ä‚¢‚é‚©
+    // NetWorkObjectãŒç”Ÿæˆã•ã‚ŒãŸã‹
     public bool IsSpawned { get; protected set; }
 
-    // DontDestroyOnLoad—pbool
+    // DontDestroyOnLoadç”¨bool
     [SerializeField] bool DDOL = false;
 
     public static T Instance { get; private set; }
@@ -18,7 +18,7 @@ public abstract class SingletonNetWorkBehaviour<T> : NetworkBehaviour where T : 
             Instance = this as T;
         else if (Instance != this)
         {
-            Debug.Log("“ñ‚ÂˆÈã‚ ‚é‚Å");
+            Debug.Log("ã‚‚ã†ã‚ã‚‹ã‚ˆ");
             Destroy(gameObject);
         }
     }
@@ -30,7 +30,7 @@ public abstract class SingletonNetWorkBehaviour<T> : NetworkBehaviour where T : 
     }
 
     /// <summary>
-    /// ©g‚ªƒXƒ|[ƒ“‚³‚ê‚½‚ç<T>Instance‚ğ•Ô‚·
+    /// ç”Ÿæˆã•ã‚Œã‚‹ã¾ã§å¾…ã£ã¦ã‹ã‚‰è‡ªèº«ã‚’è¿”ã™
     /// </summary>
     /// <returns></returns>
     public static async UniTask<T> GetInstanceAsync()

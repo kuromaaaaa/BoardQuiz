@@ -3,17 +3,22 @@ using UnityEngine.UI;
 
 public class ScoreView : MonoBehaviour
 {
-    [SerializeField] Text _userName;
-    [SerializeField] Text _scoreText;
+    [SerializeField] private Text _userName;
+    [SerializeField] private Text _scoreText;
 
-    public void Initialize(string name)
+    public void Initialize(string name, int score)
     {
         _userName.text = name;
-        _scoreText.text = 0.ToString();
+        _scoreText.text = score.ToString();
     }
 
-    public void ScoreChane(string score)
+    public void AddScore(string score)
     {
         _scoreText.text = score;
+    }
+
+    public void Incorrect()
+    {
+        
     }
 }

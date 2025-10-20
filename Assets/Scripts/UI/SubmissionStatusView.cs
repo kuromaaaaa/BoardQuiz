@@ -7,13 +7,13 @@ public class SubmissionStatusView : MonoBehaviour
     [SerializeField] Text text;
     private void OnEnable()
     {
-        QuizData.Instance.ChangeSubmitDic += ViewUpdate;
+        QuizData.Instance.ChangeSubmitDicAction += ViewUpdate;
         ViewUpdate();
     }
 
     private void OnDisable()
     {
-        QuizData.Instance.ChangeSubmitDic -= ViewUpdate;
+        QuizData.Instance.ChangeSubmitDicAction -= ViewUpdate;
     }
 
     async void ViewUpdate()

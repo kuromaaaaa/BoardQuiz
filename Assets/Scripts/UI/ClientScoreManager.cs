@@ -1,40 +1,91 @@
-using Fusion;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-public class ClientScoreManager : MonoBehaviour, IPlayerJoined, IPlayerLeft
+public class ClientScoreManager : MonoBehaviour
 {
     [SerializeField] GameObject _ScorePrefab;
 
     Dictionary<int, ScoreView> scoreBoardDic = new();
-    public async void PlayerJoined(PlayerRef player)
+    
+    UserData _userData;
+
+    private void Start()
     {
-        
-        GameObject scoreBoard = Instantiate(_ScorePrefab);
-        scoreBoard.transform.parent = this.transform;
-        scoreBoard.transform.localScale = new Vector3(1, 1, 1);
-        
-        ScoreView score = scoreBoard.GetComponent<ScoreView>();
-        score.Initialize((string)(await UserData.GetInstanceAsync()).NwpUserDic[player.PlayerId]);
-        scoreBoardDic[player.PlayerId] = score;
+        NetworkStarter.Instance.JoinGame += Initialize;
     }
 
-    public void PlayerLeft(PlayerRef player)
+    private async void Initialize()
     {
-        foreach(var kv in scoreBoardDic)
+        ScoreData scoreData = await ScoreData.GetInstanceAsync();
+
+        scoreData.ScoreChangeAction.Add(
+            NetworkRunnerLocator.Instance.LocalPlayer.PlayerId
+            ,ClientScoreChange);
+
+        foreach (var data in scoreData.NwpScoreDic)
         {
-            Destroy(kv.Value.gameObject);
+            PlayerAdd(data.Key);
         }
-        scoreBoardDic.Clear();
     }
 
 
-
-    public async void ChangeScore()
+    private void ClientScoreChange(PlayerScoreChangeData data)
     {
-        foreach(var kv in (await ScoreData.GetInstanceAsync()).NwpScoreDic)
+        switch (data.State)
         {
-            scoreBoardDic[kv.Key].ScoreChane(kv.Value.ToString());
+            case (PlayerScoreChangeState.Add):
+            {
+                foreach (var ids in data.PlayerIds)
+                {
+                    Debug.Log("PlayerAdd : " + string.Join(",", ids));
+                    PlayerAdd(ids);
+                }
+                break;
+            }
+            case PlayerScoreChangeState.Remove:
+            {
+                foreach (var ids in data.PlayerIds)
+                {
+                    Debug.Log("PlayerRemove : " + string.Join(",", ids));
+                    PlayerLeft(ids);
+                }
+                break;
+            }
+            case (PlayerScoreChangeState.ScoreChange):
+            {
+                Debug.Log("PlayerScoreChange : " + string.Join(",", data.PlayerIds));
+                ChangeScore();
+                break;
+            }
+        }
+    }
+
+    private async void PlayerAdd(int playerId)
+    {
+        if(scoreBoardDic.ContainsKey(playerId)) return;
+        GameObject scoreBoard = Instantiate(_ScorePrefab, transform, true);
+        scoreBoard.transform.localScale = new Vector3(1, 1, 1);
+
+        ScoreView score = scoreBoard.GetComponent<ScoreView>();
+        if(_userData == null) _userData = await UserData.GetInstanceAsync();
+        await UniTask.WaitUntil(() => _userData.NwpUserDic.ContainsKey(playerId));
+        score.Initialize((string)_userData.NwpUserDic[playerId], 0);
+        scoreBoardDic.Add(playerId, score);
+    }
+
+    private void PlayerLeft(int  playerId)
+    {
+        Destroy(scoreBoardDic[playerId].gameObject);
+        scoreBoardDic.Remove(playerId);
+    }
+
+
+    private async void ChangeScore()
+    {
+        foreach (var kv in (await ScoreData.GetInstanceAsync()).NwpScoreDic)
+        {
+            scoreBoardDic[kv.Key].AddScore(kv.Value.ToString());
         }
     }
 }
