@@ -18,21 +18,32 @@ public class UIManager : SingletonMonoBehavior<UIManager>
     }
     public PlayerRole Role { get; set; } = PlayerRole.Guest;
 
+    //SerializaFieldでListにしてStart時に辞書にする
     [SerializeField] private List<StateAndObjects> _stateActiveObject;
-    [SerializeField] private List<GameObject> zuttoHyoujiSuruYatu;
-
+    private Dictionary<GameState, List<GameObject>> _stateActiveDic = new();
+    
+    [SerializeField] private List<GameObject> _alwaysActiveObject;
+    
     [SerializeField] private SetTimer _timer;
     private Tweener _timerTweener;
+
+    private void Awake()
+    {
+        base.Awake();
+        foreach (var obj in _stateActiveObject)
+        {
+            _stateActiveDic.Add(obj.state, obj.objects);
+        }
+    }
+    
     private void OnEnable()
     {
-        NetWorkGameState.Instance.ClientChangeSceneAction += OnChangeState;
-        QuizData.Instance.ChangeSubmitDicAction += AllSubmitAnswer;
+        NetWorkGameState.Instance.ClientChangeStateAction += OnChangeState;
     }
 
     private void OnDisable()
     {
-        NetWorkGameState.Instance.ClientChangeSceneAction -= OnChangeState;
-        QuizData.Instance.ChangeSubmitDicAction -= AllSubmitAnswer;
+        NetWorkGameState.Instance.ClientChangeStateAction -= OnChangeState;
     }
 
     private async void OnChangeState(GameState nextState)
@@ -80,45 +91,35 @@ public class UIManager : SingletonMonoBehavior<UIManager>
                 break;
             }
         }
-
-
-        foreach (var sao in _stateActiveObject)
-        {
-            if (sao.state == nextState)
-            {
-                foreach (Transform go in this.gameObject.transform)
-                {
-                    go.gameObject.SetActive(false);
-                }
-
-                foreach (var go in sao.objects)
-                {
-                    go.gameObject.SetActive(true);
-                }
-                break;
-            }
-        }
-        foreach (var go in zuttoHyoujiSuruYatu)
-        {
-            go.SetActive(true);
-        }
+        ChangeActiveObject(_stateActiveDic[nextState]);
         _currentState = nextState;
     }
 
+    private void ChangeActiveObject(List<GameObject> activeObjects)
+    {
+        foreach (Transform go in this.gameObject.transform)
+        {
+            go.gameObject.SetActive(false);
+        }
+
+        foreach (var go in activeObjects)
+        {
+            go.gameObject.SetActive(true);
+        }
+        
+        foreach (var go in _alwaysActiveObject)
+        {
+            go.SetActive(true);
+        }
+    }
+    
+    
     public async void TimerStart()
     {
         OriginNetWorkTimer timer = await OriginNetWorkTimer.GetInstanceAsync();
         await NetWorkGameState.GetInstanceAsync();
-        await UniTask.WaitUntil(() => timer.TimerTicking);
-        _timerTweener = _timer.SetTime(timer.CurrentTime, () =>
-        {
-            NetWorkGameState.Instance.NwpCurrentGameState = GameState.Answer;
-        });
-    }
-
-    private void AllSubmitAnswer()
-    {
-        _timerTweener?.Complete();
+        await UniTask.WaitUntil(() => timer.NwpTimerTicking);
+        _timerTweener = _timer.SetTime(timer.NwpCurrentTime);
     }
 }
 
@@ -126,7 +127,7 @@ public class UIManager : SingletonMonoBehavior<UIManager>
 public class StateAndObjects
 {
     public GameState state;
-    public GameObject[] objects;
+    public List<GameObject> objects;
 }
 
 public enum PlayerRole

@@ -1,6 +1,4 @@
-using Cysharp.Threading.Tasks;
 using Fusion;
-using UnityEngine;
 
 public class UserData : SingletonNetWorkBehaviour<UserData>, IPlayerLeft
 {

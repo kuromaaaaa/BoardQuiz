@@ -2,40 +2,44 @@ using Cysharp.Threading.Tasks;
 using Fusion;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class NetWorkGameState : SingletonNetWorkBehaviour<NetWorkGameState>
 {
     [Networked, OnChangedRender(nameof(OnChangeSceneState))]
     public GameState NwpCurrentGameState { get; set; } = GameState.Title;
 
-    public Action<GameState> ClientChangeSceneAction;
+    public Action<GameState> ClientChangeStateAction;
 
     public async void OnChangeSceneState()
     {
-        ClientChangeSceneAction?.Invoke(NwpCurrentGameState);
+        ClientChangeStateAction?.Invoke(NwpCurrentGameState);
         if(NwpCurrentGameState == GameState.Thinking)
         {
             OriginNetWorkTimer timer = (await OriginNetWorkTimer.GetInstanceAsync());
             QuizData quiz = (await QuizData.GetInstanceAsync());
 
-            timer.CurrentTime = quiz.NwpThinkingTime;
-            timer.TimerStart(quiz.NwpThinkingTime);
+            timer.NwpCurrentTime = quiz.NwpThinkingTime;
+            timer.RPC_TimerStart(quiz.NwpThinkingTime);
         }
         else if(NwpCurrentGameState == GameState.Answer)
         {
             ScoreData score = (await ScoreData.GetInstanceAsync());
             score.Correct();
+
+            await UniTask.WaitForSeconds(1);
+            NwpCurrentGameState = GameState.GameSelect;
         }
     }
 
     private void OnEnable()
     {
-        ClientChangeSceneAction += PlayerClear;
+        ClientChangeStateAction += PlayerClear;
     }
 
     private void OnDisable()
     {
-        ClientChangeSceneAction -= PlayerClear;
+        ClientChangeStateAction -= PlayerClear;
     }
 
     [Rpc(RpcSources.All, RpcTargets.All)]

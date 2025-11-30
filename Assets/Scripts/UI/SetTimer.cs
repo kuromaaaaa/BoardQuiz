@@ -9,7 +9,7 @@ public class SetTimer : MonoBehaviour
     [SerializeField] Text _text;
     [SerializeField] float _currentTime = 0.0f;
 
-    public Tweener SetTime(float time, Action complete)
+    public Tweener SetTime(float time)
     {
         _text.gameObject.SetActive(true);
         _pizza.gameObject.SetActive(true);
@@ -22,19 +22,12 @@ public class SetTimer : MonoBehaviour
             .SetEase(Ease.Linear)
             .OnUpdate(() =>
             {
-                Debug.Log(_currentTime);
-                _text.text = Math.Ceiling(_currentTime).ToString(); //Ø‚èã‚°•\Ž¦
+                _text.text = Math.Ceiling(_currentTime).ToString(); //åˆ‡ã‚Šæ¨ã¦ã§è¡¨ç¤º
                 _pizza.fillAmount = _currentTime / time;
-            }).OnUpdate(() =>
-            {
-                _text.text = (Math.Ceiling(_currentTime).ToString());
-                _pizza.fillAmount = _currentTime / time;
-            }
-            ).OnComplete(() => 
+            }).OnComplete(() => 
             {
                 _text.gameObject.SetActive(false);
                 _pizza.gameObject.SetActive(false);
-                complete?.Invoke();
             });
     }
 }

@@ -4,21 +4,31 @@ using System;
 
 public class OriginNetWorkTimer : SingletonNetWorkBehaviour<OriginNetWorkTimer>
 {
+    private Tweener _timeTween;
+    
     [Networked]
-    public float CurrentTime { get; set; }
+    public float NwpCurrentTime { get; set; }
     [Networked]
-    public bool TimerTicking { get; private set; } = false;
-
-    public Action TimerStartAction;
-    public void TimerStart(float time)
+    public bool NwpTimerTicking { get; private set; } = false;
+    
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_TimerStart(float time)
     {
-        TimerTicking = true;
-        DOTween.To(() =>
-            CurrentTime,
-            (n) => CurrentTime = n,
+        NwpTimerTicking = true;
+        _timeTween = DOTween.To(() =>
+            NwpCurrentTime,
+            (n) => NwpCurrentTime = n,
             0,
             time)
-            .SetEase(Ease.Linear).OnComplete(() => TimerTicking = false);
+            .SetEase(Ease.Linear).OnComplete(async () =>
+            {
+                NwpTimerTicking = false;
+                (await NetWorkGameState.GetInstanceAsync()).RPC_ChangeState(GameState.Answer);
+            });
+    }
 
+    public void RPC_TimerComplete()
+    {
+        _timeTween.Complete();
     }
 }

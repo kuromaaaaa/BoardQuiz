@@ -1,6 +1,7 @@
 using Fusion;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class ScoreData : SingletonNetWorkBehaviour<ScoreData>, IPlayerJoined, IPlayerLeft
 {
@@ -17,6 +18,7 @@ public class ScoreData : SingletonNetWorkBehaviour<ScoreData>, IPlayerJoined, IP
     public void RPC_ScoreAdd(int id)
     {
         NwpScoreDic.Set(id, NwpScoreDic[id] + 1);
+        Debug.Log(NwpScoreDic[id]);
     }
 
     public void PlayerJoined(PlayerRef player)
@@ -54,6 +56,7 @@ public class ScoreData : SingletonNetWorkBehaviour<ScoreData>, IPlayerJoined, IP
         {
             if(kv.Value == _quizData.NwpAnswer)
             {
+                //ホストのデータクラスの値を変更
                 RPC_ScoreAdd(kv.Key);
                 correctAnswerPlayerIds.Add(kv.Key);
             }
@@ -61,6 +64,7 @@ public class ScoreData : SingletonNetWorkBehaviour<ScoreData>, IPlayerJoined, IP
 
         foreach (var score in ScoreChangeAction)
         {
+            //各ユーザーに正解者のIDを送る
             score.Value?.Invoke(new PlayerScoreChangeData(PlayerScoreChangeState.ScoreChange, correctAnswerPlayerIds));
         }
     }

@@ -12,7 +12,7 @@ public class ScoreView : MonoBehaviour
         _scoreText.text = score.ToString();
     }
 
-    public void AddScore(string score)
+    public void ChangeScore(string score)
     {
         _scoreText.text = score;
     }

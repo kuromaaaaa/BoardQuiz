@@ -9,6 +9,7 @@ public class QuizData : SingletonNetWorkBehaviour<QuizData>, IPlayerJoined
     [Networked][UnitySerializeField] public NetworkString<_32> NwpAnswer { get; set; }
     [Networked][UnitySerializeField] public int NwpThinkingTime { get; set; }
     [Networked][UnitySerializeField] public QuizGameMode NwpGameMode { get; set; } = QuizGameMode.Select;
+    // PlayerId と 答えの辞書
     [Networked, OnChangedRender(nameof(OnChangeAnswerDic))][Capacity(100)][UnitySerializeField] public NetworkDictionary<int, NetworkString<_32>> NwpAnswerDic { get; } = new();
     [Networked, OnChangedRender(nameof(OnChangeSubmittedDic))][Capacity(100)][UnitySerializeField] public NetworkDictionary<int, bool> NwpSubmittedDic { get; } = new();
 
@@ -66,11 +67,7 @@ public class QuizData : SingletonNetWorkBehaviour<QuizData>, IPlayerJoined
         if (NwpSubmittedDic.Count == NwpSubmittedDic.Where((x) => x.Value).Count())
         { // すべてのPlayerが回答したら
 
-            NetWorkGameState gameState = (await NetWorkGameState.GetInstanceAsync());
-            if (gameState.NwpCurrentGameState == GameState.Thinking)
-            {
-                gameState.RPC_ChangeState(GameState.Answer);
-            }
+            (await OriginNetWorkTimer.GetInstanceAsync()).RPC_TimerComplete();
         }
         ChangeSubmitDicAction?.Invoke();
     }

@@ -55,7 +55,7 @@ public class ClientScoreManager : MonoBehaviour
             case (PlayerScoreChangeState.ScoreChange):
             {
                 Debug.Log("PlayerScoreChange : " + string.Join(",", data.PlayerIds));
-                ChangeScore();
+                ChangeScore(data.PlayerIds);
                 break;
             }
         }
@@ -81,11 +81,11 @@ public class ClientScoreManager : MonoBehaviour
     }
 
 
-    private async void ChangeScore()
+    private async void ChangeScore(List<int> ids)
     {
         foreach (var kv in (await ScoreData.GetInstanceAsync()).NwpScoreDic)
         {
-            scoreBoardDic[kv.Key].AddScore(kv.Value.ToString());
+            scoreBoardDic[kv.Key].ChangeScore(kv.Value.ToString());
         }
     }
 }
