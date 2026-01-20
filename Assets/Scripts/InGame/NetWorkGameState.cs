@@ -11,6 +11,7 @@ public class NetWorkGameState : SingletonNetWorkBehaviour<NetWorkGameState>
 
     public Action<GameState> ClientChangeStateAction;
 
+    //State変更時に呼び出される
     public async void OnChangeSceneState()
     {
         ClientChangeStateAction?.Invoke(NwpCurrentGameState);

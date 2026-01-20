@@ -35,6 +35,10 @@ public class QuizData : SingletonNetWorkBehaviour<QuizData>, IPlayerJoined
         NwpAnswerDic.Remove(id);
         NwpSubmittedDic.Remove(id);
     }
+    
+    /// <summary>
+    /// ゲームリスタート時に回答をクリアする
+    /// </summary>
     [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_PlayerClear()
     {
@@ -50,11 +54,11 @@ public class QuizData : SingletonNetWorkBehaviour<QuizData>, IPlayerJoined
     }
 
     /// <summary>
-    /// 
+    /// Playerの回答をサーバーに送信する
     /// </summary>
-    /// <param name="id">PlayerId</param>
-    /// <param name="submit">怪盗提出</param>
-    /// <param name="answer">答え</param>
+    /// <param name="id">送信元のPlayerId</param>
+    /// <param name="submit">回答提出フラグ</param>
+    /// <param name="answer">回答の内容</param>
     [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_SendAnswer(int id, bool submit, string answer)
     {
@@ -62,6 +66,9 @@ public class QuizData : SingletonNetWorkBehaviour<QuizData>, IPlayerJoined
         NwpSubmittedDic.Set(id, submit);
     }
 
+    /// <summary>
+    /// 実装された辞書に変化があったときに呼び出される
+    /// </summary>
     private async void OnChangeSubmittedDic()
     {
         if (NwpSubmittedDic.Count == NwpSubmittedDic.Where((x) => x.Value).Count())

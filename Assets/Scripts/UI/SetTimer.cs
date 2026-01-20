@@ -9,6 +9,7 @@ public class SetTimer : MonoBehaviour
     [SerializeField] Text _text;
     [SerializeField] float _currentTime = 0.0f;
 
+    // クライアント側のタイマーを開始する
     public Tweener SetTime(float time)
     {
         _text.gameObject.SetActive(true);

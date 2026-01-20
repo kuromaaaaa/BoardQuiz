@@ -27,6 +27,9 @@ public class OriginNetWorkTimer : SingletonNetWorkBehaviour<OriginNetWorkTimer>
             });
     }
 
+    /// <summary>
+    /// タイマーを終了してStateをAnswerに変更する
+    /// </summary>
     public void RPC_TimerComplete()
     {
         _timeTween.Complete();

@@ -51,6 +51,8 @@ public class NetworkStarter : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField] InputField _userNameInput;
     [SerializeField] InputField _passwordInput;
 
+    
+    //SharedModeでオンラインを開始する
     public async void StartGame()
     {
         if (_userNameInput.text == string.Empty || _passwordInput.text == string.Empty) { return; }
